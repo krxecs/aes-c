@@ -12,6 +12,7 @@ jobs:
     # Trigger the job only when someone comments - Reformat: Code
     if: "${{ github.event.issue.pull_request && contains(github.event.comment.body, 'Reformat: Code') }}"
     runs-on: ubuntu-24.04
+    permissions: write-all
 
     steps:
       - name: Checkout project
