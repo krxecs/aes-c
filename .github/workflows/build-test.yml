@@ -58,19 +58,17 @@ jobs:
       - name: Download Intel SDE (Linux)
         if: runner.os == 'Linux'
         run: |
-          curl https://downloadmirror.intel.com/732268/sde-external-9.7.0-2022-05-09-lin.tar.xz --output sde-external-9.7.0-2022-05-09-lin.tar.xz
-          tar xJvf sde-external-9.7.0-2022-05-09-lin.tar.xz
-          mv sde-external-9.7.0-2022-05-09-lin sde
+          curl https://downloadmirror.intel.com/850782/sde-external-9.53.0-2025-03-16-lin.tar.xz --output sde.tar.xz
+          tar xJvf sde.tar.xz
 
       - name: Download Intel SDE (Windows)
         shell: pwsh
         if: runner.os == 'Windows'
         run: |
           choco upgrade 7zip -y
-          Invoke-WebRequest https://downloadmirror.intel.com/732268/sde-external-9.7.0-2022-05-09-win.tar.xz -OutFile sde-external-9.7.0-2022-05-09-win.tar.xz
-          7z x sde-external-9.7.0-2022-05-09-win.tar.xz
-          7z x sde-external-9.7.0-2022-05-09-win.tar -y
-          Move-Item sde-external-9.7.0-2022-05-09-win sde
+          Invoke-WebRequest https://downloadmirror.intel.com/850782/sde-external-9.53.0-2025-03-16-win.tar.xz -OutFile sde.tar.xz
+          7z x sde.tar.xz
+          7z x sde.tar -y
 
       - name: Setup yama for Intel SDE to run
         if: runner.os == 'Linux'
