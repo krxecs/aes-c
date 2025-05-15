@@ -48,7 +48,7 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   )
 endif ()
 
-CPMAddPackage("gh:arnavyc/explicit-memset#origin/main")
+CPMAddPackage("gh:krxecs/explicit-memset@0.1.0")
 
 # --- Section: Targets ---
 

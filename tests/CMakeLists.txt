@@ -1,4 +1,4 @@
-CPMAddPackage("gh:arnavyc/Munit.cmake#origin/main")
+CPMAddPackage("gh:krxecs/Munit.cmake@0.1.0")
 munit_cmake_init()
 
 include(DownloadMunitCPM)

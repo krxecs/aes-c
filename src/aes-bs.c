@@ -383,10 +383,10 @@ static struct AesBsState aesbs_InvShiftRows(struct AesBsState state) {
 #define generic_mask(n) (CHAR_BIT * sizeof(n) - 1)
 #define generic_negate(n) (-(n))
 #define generic_rotl(n, c)                                                     \
-  ((n) << ((c)&generic_mask(n)) |                                              \
+  ((n) << ((c) & generic_mask(n)) |                                            \
    ((n) >> (generic_negate(c) & generic_mask(n))))
 #define generic_rotr(n, c)                                                     \
-  ((n) >> ((c)&generic_mask(n)) |                                              \
+  ((n) >> ((c) & generic_mask(n)) |                                            \
    ((n) << (generic_negate(c) & generic_mask(n))))
 
 static inline uint16_t rotr16(uint16_t n, unsigned char c) {

@@ -1,5 +1,3 @@
-# Copyright 2021 arnavyc <arnavyc@outlook.com>
-#
 # SPDX-License-Identifier: 0BSD
 
 name: "Check code & configuration with {clang,cmake}-format"
@@ -8,13 +6,16 @@ on: push
 
 jobs:
   ubuntu:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout project
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install CMake and Ninja
-        uses: lukka/get-cmake@v3.20.1
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: ~3.27.4
+          ninjaVersion: ^1.12.1
 
       - name: 'Setup Python ^3.8'
         uses: actions/setup-python@v2
@@ -35,4 +36,3 @@ jobs:
 
       - name: Check formatting of code & configuration
         run: cmake --build build/ --target check-format
-
