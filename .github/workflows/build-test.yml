@@ -60,6 +60,7 @@ jobs:
         run: |
           curl https://downloadmirror.intel.com/850782/sde-external-9.53.0-2025-03-16-lin.tar.xz --output sde.tar.xz
           tar xJvf sde.tar.xz
+          mv sde-external-9.53.0-2025-03-16-lin sde
 
       - name: Download Intel SDE (Windows)
         shell: pwsh
@@ -69,6 +70,7 @@ jobs:
           Invoke-WebRequest https://downloadmirror.intel.com/850782/sde-external-9.53.0-2025-03-16-win.tar.xz -OutFile sde.tar.xz
           7z x sde.tar.xz
           7z x sde.tar -y
+          mv sde-external-9.53.0-2025-03-16-win sde
 
       - name: Setup yama for Intel SDE to run
         if: runner.os == 'Linux'
