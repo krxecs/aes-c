@@ -46,34 +46,8 @@ enum AesKeyType {
  */
 typedef struct AesContext AesContext;
 
-/**
- * @cond
- * **PRIVATE**: Do not use as consumer of library.
- */
-struct aes_vtable {
-  void (*init)(AesContext *ctx, enum AesKeyType key_type,
-               const unsigned char *key);
-
-  void (*ctr_xcrypt)(AesContext *ctx, size_t textsize, unsigned char *out,
-                     const unsigned char *in, unsigned char next_iv[16],
-                     const unsigned char iv[16]);
-  void (*ecb_encrypt)(AesContext *ctx, size_t textsize,
-                      unsigned char *cipher_text,
-                      const unsigned char *plain_text);
-  void (*ecb_decrypt)(AesContext *ctx, size_t textsize,
-                      unsigned char *plain_text,
-                      const unsigned char *cipher_text);
-
-  void (*cbc_encrypt)(AesContext *ctx, size_t textsize,
-                      unsigned char *cipher_text,
-                      const unsigned char *plain_text,
-                      const unsigned char iv[16]);
-
-  void (*cbc_decrypt)(AesContext *ctx, size_t textsize,
-                      unsigned char *plain_text,
-                      const unsigned char *cipher_text,
-                      const unsigned char iv[16]);
-};
+/** @cond */
+// struct aes_vtable is now private and defined in src/inner.h
 /** @endcond */
 
 /** @cond
@@ -82,7 +56,7 @@ struct aes_vtable {
 struct AesContext {
   unsigned short key_size;
   unsigned char Nr;
-  struct aes_vtable vtable;
+  struct aes_vtable *vtable;
   AY_AES_ALIGNAS(16)
   unsigned char enc_round_keys[NUM_ROUND_KEYS_IN_ARRAY * SIZE_OF_AES_ROUND_KEY];
   AY_AES_ALIGNAS(16)

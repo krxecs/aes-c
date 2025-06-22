@@ -15,4 +15,30 @@
 #define AY_FLATTEN
 #endif /* defined (__GNUC__) */
 
+// Definition of struct aes_vtable is now private to the implementation
+struct aes_vtable {
+  void (*init)(AesContext *ctx, enum AesKeyType key_type,
+               const unsigned char *key);
+
+  void (*ctr_xcrypt)(AesContext *ctx, size_t textsize, unsigned char *out,
+                     const unsigned char *in, unsigned char next_iv[16],
+                     const unsigned char iv[16]);
+  void (*ecb_encrypt)(AesContext *ctx, size_t textsize,
+                      unsigned char *cipher_text,
+                      const unsigned char *plain_text);
+  void (*ecb_decrypt)(AesContext *ctx, size_t textsize,
+                      unsigned char *plain_text,
+                      const unsigned char *cipher_text);
+
+  void (*cbc_encrypt)(AesContext *ctx, size_t textsize,
+                      unsigned char *cipher_text,
+                      const unsigned char *plain_text,
+                      const unsigned char iv[16]);
+
+  void (*cbc_decrypt)(AesContext *ctx, size_t textsize,
+                      unsigned char *plain_text,
+                      const unsigned char *cipher_text,
+                      const unsigned char iv[16]);
+};
+
 #endif
