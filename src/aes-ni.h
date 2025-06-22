@@ -4,6 +4,10 @@
 #include <stddef.h>
 #include <wmmintrin.h>
 
+#include <ay/aes/hedley.h>
+
+HEDLEY_BEGIN_C_DECLS
+
 #include <ay/aes.h>
 
 void aesni_init(AesContext *ctx, enum AesKeyType key_size,
@@ -49,5 +53,7 @@ void aesni_cbc_decrypt(AesContext *ctx, size_t textsize,
                        unsigned char *plain_text,
                        const unsigned char *cipher_text,
                        const unsigned char iv[16]);
+
+HEDLEY_END_C_DECLS
 
 #endif /* AY_AES_NI_H */

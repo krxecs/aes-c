@@ -62,17 +62,13 @@ static __m128i xor_dw_with_prev_dw(__m128i x) {
 }
 
 /* AES-128 functions */
-static inline __m128i aes128_keyexp_round_core(__m128i key,
-                                               __m128i keygenassist_output) {
-  key = xor_dw_with_prev_dw(key);
-
-  keygenassist_output =
-      _mm_shuffle_epi32(keygenassist_output, _MM_SHUFFLE(3, 3, 3, 3));
-  return _mm_xor_si128(key, keygenassist_output);
+template <int rcon>
+static inline __m128i aes128_keyexp_round(__m128i key) {
+  __m128i x = xor_dw_with_prev_dw(key);
+  __m128i y = _mm_shuffle_epi32(
+      _mm_aeskeygenassist_si128(key, rcon), _MM_SHUFFLE(3, 3, 3, 3));
+  return _mm_xor_si128(x, y);
 }
-
-#define aes128_keyexp_round(key, rcon)                                         \
-  aes128_keyexp_round_core((key), _mm_aeskeygenassist_si128((key), (rcon)))
 
 static inline void aes128_expand_key(__m128i enc_ks[11], __m128i key) {
   /*
@@ -101,16 +97,16 @@ static inline void aes128_expand_key(__m128i enc_ks[11], __m128i key) {
    */
   /* Generate encryption round keys */
   enc_ks[0] = key;
-  enc_ks[1] = aes128_keyexp_round(enc_ks[0], 0x01);
-  enc_ks[2] = aes128_keyexp_round(enc_ks[1], 0x02);
-  enc_ks[3] = aes128_keyexp_round(enc_ks[2], 0x04);
-  enc_ks[4] = aes128_keyexp_round(enc_ks[3], 0x08);
-  enc_ks[5] = aes128_keyexp_round(enc_ks[4], 0x10);
-  enc_ks[6] = aes128_keyexp_round(enc_ks[5], 0x20);
-  enc_ks[7] = aes128_keyexp_round(enc_ks[6], 0x40);
-  enc_ks[8] = aes128_keyexp_round(enc_ks[7], 0x80);
-  enc_ks[9] = aes128_keyexp_round(enc_ks[8], 0x1B);
-  enc_ks[10] = aes128_keyexp_round(enc_ks[9], 0x36);
+  enc_ks[1] = aes128_keyexp_round<0x01>(enc_ks[0]);
+  enc_ks[2] = aes128_keyexp_round<0x02>(enc_ks[1]);
+  enc_ks[3] = aes128_keyexp_round<0x04>(enc_ks[2]);
+  enc_ks[4] = aes128_keyexp_round<0x08>(enc_ks[3]);
+  enc_ks[5] = aes128_keyexp_round<0x10>(enc_ks[4]);
+  enc_ks[6] = aes128_keyexp_round<0x20>(enc_ks[5]);
+  enc_ks[7] = aes128_keyexp_round<0x40>(enc_ks[6]);
+  enc_ks[8] = aes128_keyexp_round<0x80>(enc_ks[7]);
+  enc_ks[9] = aes128_keyexp_round<0x1b>(enc_ks[8]);
+  enc_ks[10] = aes128_keyexp_round<0x36>(enc_ks[9]);
 }
 
 /*
@@ -186,20 +182,12 @@ static inline void AES_192_Key_Expansion(const __m128i userkey[2],
  * AES-256 functions
  */
 
-#define aes256_keyexp_round(round_key1, key0, key1, rcon)                      \
-  aes256_keyexp_round_core((round_key1), (key0), (key1),                       \
-                           _mm_aeskeygenassist_si128((key0), (rcon)))
-
-static inline __m128i
-aes256_keyexp_round_core(__m128i *round_key1, __m128i key0, __m128i key1,
-                         __m128i keygenassist_lower_output) {
+template <int rcon>
+static inline __m128i aes256_keyexp_round(__m128i *round_key1, __m128i key0, __m128i key1) {
   __m128i key_lower = key1;
 
-  __m128i tmp1 =
-      _mm_shuffle_epi32(keygenassist_lower_output, _MM_SHUFFLE(3, 3, 3, 3));
-  // for (size_t i = 0; i < 3; ++i) {
-  //   key_lower = _mm_xor_si128(key_lower, _mm_slli_si128(key_lower, 4));
-  // }
+  __m128i keygenassist_lower_output = _mm_aeskeygenassist_si128(key0, rcon);
+  __m128i tmp1 = _mm_shuffle_epi32(keygenassist_lower_output, _MM_SHUFFLE(3, 3, 3, 3));
   key_lower = xor_dw_with_prev_dw(key_lower);
   key_lower = _mm_xor_si128(key_lower, tmp1);
 
@@ -213,20 +201,19 @@ aes256_keyexp_round_core(__m128i *round_key1, __m128i key0, __m128i key1,
 
     *round_key1 = key_upper;
   }
-  // round_key0
   return key_lower;
 }
 
 static inline void aes256_expand_key(__m128i *enc_ks, __m128i key[2]) {
   enc_ks[0] = key[0];
   enc_ks[1] = key[1];
-  enc_ks[2] = aes256_keyexp_round(&enc_ks[3], enc_ks[1], enc_ks[0], 1);
-  enc_ks[4] = aes256_keyexp_round(&enc_ks[5], enc_ks[3], enc_ks[2], 2);
-  enc_ks[6] = aes256_keyexp_round(&enc_ks[7], enc_ks[5], enc_ks[4], 4);
-  enc_ks[8] = aes256_keyexp_round(&enc_ks[9], enc_ks[7], enc_ks[6], 8);
-  enc_ks[10] = aes256_keyexp_round(&enc_ks[11], enc_ks[9], enc_ks[8], 0x10);
-  enc_ks[12] = aes256_keyexp_round(&enc_ks[13], enc_ks[11], enc_ks[10], 0x20);
-  enc_ks[14] = aes256_keyexp_round(NULL, enc_ks[13], enc_ks[12], 0x40);
+  enc_ks[2] = aes256_keyexp_round<1>(&enc_ks[3], enc_ks[1], enc_ks[0]);
+  enc_ks[4] = aes256_keyexp_round<2>(&enc_ks[5], enc_ks[3], enc_ks[2]);
+  enc_ks[6] = aes256_keyexp_round<4>(&enc_ks[7], enc_ks[5], enc_ks[4]);
+  enc_ks[8] = aes256_keyexp_round<8>(&enc_ks[9], enc_ks[7], enc_ks[6]);
+  enc_ks[10] = aes256_keyexp_round<0x10>(&enc_ks[11], enc_ks[9], enc_ks[8]);
+  enc_ks[12] = aes256_keyexp_round<0x20>(&enc_ks[13], enc_ks[11], enc_ks[10]);
+  enc_ks[14] = aes256_keyexp_round<0x40>(NULL, enc_ks[13], enc_ks[12]);
 }
 
 static unsigned char key_size_to_nr(unsigned short key_size) {
@@ -241,6 +228,10 @@ static unsigned char key_size_to_nr(unsigned short key_size) {
 
   HEDLEY_UNREACHABLE_RETURN(0);
 }
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void aesni_init(AesContext *ctx, enum AesKeyType key_size,
                 const unsigned char *key) {
@@ -412,3 +403,7 @@ void aesni_ctr_xcrypt(AesContext *ctx, size_t textsize, unsigned char *out,
     _mm_storeu_si128((__m128i *)next_iv, m128i_bswap(iv_reg));
   }
 }
+
+#ifdef __cplusplus
+}
+#endif

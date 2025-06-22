@@ -3,13 +3,13 @@ cmake_policy(SET CMP0091 NEW)
 cmake_minimum_required(VERSION 3.16...3.20 FATAL_ERROR)
 
 # --- Section: Project Option for C++ ---
-option(${PROJECT_NAME}_ENABLE_CPP "Enable compilation of C++ files in the project." ON)
-
 project(
   aes-c
   LANGUAGES C
   VERSION 0.0.1
 )
+
+option(${PROJECT_NAME}_ENABLE_CPP "Enable compilation of C++ files in the project." ON)
 
 if (${PROJECT_NAME}_ENABLE_CPP)
   enable_language(CXX)
@@ -67,17 +67,25 @@ target_include_directories(public-incdir-default INTERFACE include)
 # add_library(private-incdir-default INTERFACE)
 # target_include_directories(private-incdir-default PUBLIC src)
 
-add_library(aes-ni OBJECT src/aes-ni.c)
-if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)"
-    AND CMAKE_C_COMPILER_ID MATCHES "(GNU)|(.*Clang)|(IntelLLVM)"
-)
-  target_compile_options(aes-ni PRIVATE -maes -msse -msse2 -mssse3)
-endif ()
-target_include_directories(aes-ni PUBLIC src)
-# target_link_libraries(aes-ni PRIVATE internal-hexdump)
-target_link_libraries(aes-ni PUBLIC public-incdir-default)
+if (${PROJECT_NAME}_ENABLE_CPP)
+  add_library(aes-ni OBJECT src/aes-ni.cpp)
+  if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)"
+      AND CMAKE_C_COMPILER_ID MATCHES "(GNU)|(.*Clang)|(IntelLLVM)"
+  )
+    target_compile_options(aes-ni PRIVATE -maes -msse -msse2 -mssse3)
+  endif ()
 
-add_library(aes-c src/aes.c $<TARGET_OBJECTS:aes-ni> $<TARGET_OBJECTS:aes-bs>)
+  target_include_directories(aes-ni PUBLIC src)
+  # target_link_libraries(aes-ni PRIVATE internal-hexdump)
+  target_link_libraries(aes-ni PUBLIC public-incdir-default)
+endif ()
+
+add_library(aes-c src/aes.c $<TARGET_OBJECTS:aes-bs>)
+
+if (${PROJECT_NAME}_ENABLE_CPP)
+  target_sources(aes-c PRIVATE $<TARGET_OBJECTS:aes-ni>)
+endif ()
+
 target_include_directories(
   aes-c
   PRIVATE src ${PUBLIC_HEADER_DIR} SYSTEM
