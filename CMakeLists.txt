@@ -2,11 +2,18 @@ cmake_policy(SET CMP0091 NEW)
 
 cmake_minimum_required(VERSION 3.16...3.20 FATAL_ERROR)
 
+# --- Section: Project Option for C++ ---
+option(${PROJECT_NAME}_ENABLE_CPP "Enable compilation of C++ files in the project." ON)
+
 project(
   aes-c
   LANGUAGES C
   VERSION 0.0.1
 )
+
+if (${PROJECT_NAME}_ENABLE_CPP)
+  enable_language(CXX)
+endif ()
 
 include(cmake/DefaultConfig.cmake)
 
